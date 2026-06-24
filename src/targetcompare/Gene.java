@@ -1,85 +1,49 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package targetcompare;
 
-/**
- * 
- * @author fabiano
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class Gene {
 
-	Mirna[] mirna;
-	int qtdade;
-	String nomeGene;
+    private final String nomeGene;
+    private final List<Mirna> mirnas;
+    private int qtdade;
 
-	Gene(String[] nome) {
+    public Gene(String nomeGene, String[] nomesMirnas) {
+        this.nomeGene = nomeGene;
+        this.mirnas = new ArrayList<>(nomesMirnas.length);
+        for (String nome : nomesMirnas) {
+            mirnas.add(new Mirna(nome));
+        }
+    }
 
-		// inicializa\u00E7\u00E3o dos mirnas
-		mirna = new Mirna[nome.length];
-		for (int i = 0; i < nome.length; i++) {
-			mirna[i] = new Mirna();
-			mirna[i].setNome(nome[i]);
-			mirna[i].setAlvo(false);
-		}
-	}
+    public void markMirnaAsTarget(String nome) {
+        for (Mirna mirna : mirnas) {
+            if (mirna.getNome().equals(nome)) {
+                mirna.setAlvo(true);
+            }
+        }
+        qtdade = (int) mirnas.stream().filter(Mirna::isAlvo).count();
+    }
 
-	public void setMirnaNome(String nome) {
-		int cont = 0;
-		for (int i = 0; i < mirna.length; i++) {
-			if (mirna[i].getNome().equals(nome))
-				mirna[i].setAlvo(true);
-			if (mirna[i].isAlvo())
-				cont++;
-		}
+    public String toTableRow() {
+        StringBuilder sb = new StringBuilder(nomeGene).append('\t');
+        for (Mirna mirna : mirnas) {
+            sb.append(mirna.isAlvo()).append('\t');
+        }
+        sb.append(qtdade);
+        return sb.toString();
+    }
 
-		// determina a quantidade de mirna apontados para esse gene alvo
-		setQtdade(cont);
-	}
+    public String getNomeGene() {
+        return nomeGene;
+    }
 
-	public String printMirna() {
+    public int getQtdade() {
+        return qtdade;
+    }
 
-		String linha = getNomeGene() + "\t";
-
-		for (int i = 0; i < mirna.length; i++) {
-			linha += mirna[i].isAlvo() + "\t";
-		}
-
-		linha += getQtdade();
-
-		// String linha = nome +"\t"+ mir135b +"\t"+ mir29c +"\t"+ mir143 +"\t"+
-		// mir215 +"\t"+ mir141 +"\t"+ mir126 +"\t"+
-		// mir93 +"\t"+ mir99a +"\t"+ mir10a +"\t"+ mir17 +"\t"+ mir3607
-		// +"\t"+qtdade;
-
-		// String linha = nome +"\t"+ mir135b +"\t"+ mir29c +"\t"+ mir664 +"\t"+
-		// mir150 +"\t"+qtdade;
-
-		return linha;
-	}
-
-	public String getNomeGene() {
-		return nomeGene;
-	}
-
-	public void setNomeGene(String nome) {
-		this.nomeGene = nome;
-	}
-
-	public int getQtdade() {
-		return qtdade;
-	}
-
-	private void setQtdade(int qtdade) {
-		this.qtdade = qtdade;
-	}
-
-	public Mirna[] getMirna() {
-		return mirna;
-	}
-
-	
-
+    public List<Mirna> getMirnas() {
+        return mirnas;
+    }
 }

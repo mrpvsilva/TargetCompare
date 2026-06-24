@@ -4,17 +4,16 @@ import java.io.Serializable;
 
 public class Neuronio implements Serializable {
 
-	//atributes
+	private static final long serialVersionUID = 1L;
+
 	private double[] pesos;
 	private double distanciaEuclidiana;
 	private double gaussiana;
-	
-	//Construtor
+
 	public Neuronio(double[] pesos) {
 		this.pesos = pesos;
 	}
 
-	//Get's and Set's
 	public double getGaussiana() {
 		return gaussiana;
 	}

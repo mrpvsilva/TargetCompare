@@ -4,35 +4,34 @@ import java.io.Serializable;
 
 public class Parametros implements Serializable {
 
-	private String constanteTempo;
-	private String taxaAprendizado;
-	private String nrNeuronios;
-	private String raioGaussiana;
+    private static final long serialVersionUID = 1L;
 
-	public Parametros(String constanteTempo, String taxaAprendizado,
-			String nrNeuronios, String raioGaussiana) {
+    private final int constanteTempo;
+    private final double taxaAprendizado;
+    private final int nrNeuronios;
+    private final double raioGaussiana;
 
-		this.constanteTempo = constanteTempo+"";
-		this.taxaAprendizado = taxaAprendizado+"";
-		this.nrNeuronios = nrNeuronios+"";
-		this.raioGaussiana = raioGaussiana+"";
+    public Parametros(int constanteTempo, double taxaAprendizado,
+            int nrNeuronios, double raioGaussiana) {
+        this.constanteTempo = constanteTempo;
+        this.taxaAprendizado = taxaAprendizado;
+        this.nrNeuronios = nrNeuronios;
+        this.raioGaussiana = raioGaussiana;
+    }
 
-	}
+    public int getConstanteTempo() {
+        return constanteTempo;
+    }
 
-	public String getConstanteTempo() {
-		return constanteTempo;
-	}
+    public double getTaxaAprendizado() {
+        return taxaAprendizado;
+    }
 
-	public String getTaxaAprendizado() {
-		return taxaAprendizado;
-	}
+    public int getNrNeuronios() {
+        return nrNeuronios;
+    }
 
-	public String getNrNeuronios() {
-		return nrNeuronios;
-	}
-
-	public String getRaioGaussiana() {
-		return raioGaussiana;
-	}
-
+    public double getRaioGaussiana() {
+        return raioGaussiana;
+    }
 }

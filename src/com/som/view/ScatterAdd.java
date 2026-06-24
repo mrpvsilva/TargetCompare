@@ -1,4 +1,5 @@
 package com.som.view;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,36 +19,36 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class ScatterAdd extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-    private static final String TITLE = "GR\u00C1FICO";
-    private static double[] xe,ye;
-    private static double[] xs,ys;
-    
-    public ScatterAdd(String s ,double[] xe,double[] ye,double[] xs,double[] ys) {
+    private static final long serialVersionUID = 1L;
+    private static final String TITLE = "GRÁFICO";
+    private final double[] xe;
+    private final double[] ye;
+    private final double[] xs;
+    private final double[] ys;
+
+    public ScatterAdd(String s, double[] xe, double[] ye, double[] xs, double[] ys) {
         super(s);
         this.xe = xe;
         this.ye = ye;
         this.xs = xs;
         this.ys = ys;
-        
+
         final ChartPanel chartPanel = createDemoPanel();
         this.add(chartPanel, BorderLayout.CENTER);
         this.setMinimumSize(new Dimension(550, 400));
         this.pack();
         this.setLocationRelativeTo(null);
-
     }
 
     private ChartPanel createDemoPanel() {
         JFreeChart jfreechart = ChartFactory.createScatterPlot(
-            TITLE, "", "", createSampleData(),
-            PlotOrientation.VERTICAL, true, true, false);
+                TITLE, "", "", createSampleData(),
+                PlotOrientation.VERTICAL, true, true, false);
 
         jfreechart.setBackgroundPaint(Color.WHITE);
         jfreechart.setBorderVisible(false);
         jfreechart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 15));
-        jfreechart.getTitle().setText("Mapa de Neur\u00f4nios SOM");
-
+        jfreechart.getTitle().setText("Mapa de Neurônios SOM");
 
         XYPlot xyPlot = (XYPlot) jfreechart.getPlot();
         xyPlot.setBackgroundPaint(new Color(250, 250, 250));
@@ -84,42 +85,29 @@ public class ScatterAdd extends JFrame {
 
     private XYDataset createSampleData() {
         XYSeriesCollection xySeriesCollection = new XYSeriesCollection();
-        
-        XYSeries series = new XYSeries("VETOR DE ENTRADAS");
-       
-        for (int i = 0; i < this.xe.length; i++) {
-        	
-        	series.add(this.xe[i], this.ye[i]);
-			
-		}
-        
-        XYSeries series1 = new XYSeries("NEUR\u00D4NIOS");
-        
-        for (int i = 0; i < this.xs.length; i++) {
-        
-        	series1.add(this.xs[i], this.ys[i]);
-			
-		}
 
+        XYSeries series = new XYSeries("VETOR DE ENTRADAS");
+        for (int i = 0; i < this.xe.length; i++) {
+            series.add(this.xe[i], this.ye[i]);
+        }
+
+        XYSeries series1 = new XYSeries("NEURÔNIOS");
+        for (int i = 0; i < this.xs.length; i++) {
+            series1.add(this.xs[i], this.ys[i]);
+        }
 
         xySeriesCollection.addSeries(series);
         xySeriesCollection.addSeries(series1);
-        
         return xySeriesCollection;
     }
 
-    public static void main(String args[]) {
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                ScatterAdd demo = new ScatterAdd(TITLE,null,null,null,null);
-                demo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                demo.pack();
-                demo.setLocationRelativeTo(null);
-                demo.setVisible(true);
-                
-            }
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            ScatterAdd demo = new ScatterAdd(TITLE, null, null, null, null);
+            demo.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            demo.pack();
+            demo.setLocationRelativeTo(null);
+            demo.setVisible(true);
         });
     }
 }
