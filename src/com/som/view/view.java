@@ -266,6 +266,5 @@ public class view extends JFrame implements ActionListener {
 				entrada[i][j] = mirnaList.get(j).isAlvo() ? 1 : 0;
 			}
 		}
-		MetodosAcessorios.PrintEntrada(entrada);
 	}
 }

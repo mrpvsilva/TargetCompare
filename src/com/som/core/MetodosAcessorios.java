@@ -49,29 +49,6 @@ public class MetodosAcessorios {
         }
     }
 
-    public static void PrintNeuronios(ArrayList<Neuronio> neuronios) {
-        for (int i = 0; i < neuronios.size(); i++) {
-            Neuronio n = neuronios.get(i);
-            double[] pesos = n.getPesos();
-            for (int j = 0; j < pesos.length; j++) {
-                System.out.print("P" + (j + 1) + "N" + (i + 1) + ": " + arredondar(pesos[j], 4) + " ");
-            }
-            System.out.print("GauN" + (i + 1) + ": " + arredondar(n.getGaussiana(), 20) + " ");
-            System.out.print("DEN" + (i + 1) + ": " + arredondar(n.getDistanciaEuclidiana(), 20) + "\n");
-        }
-    }
-
-    public static void PrintEntrada(double[][] entrada) {
-        Matrix m = new Matrix(entrada);
-        double[][] transposta = m.transpose().getArray();
-        for (double[] linha : transposta) {
-            for (double valor : linha) {
-                System.out.print(valor + " ");
-            }
-            System.out.println();
-        }
-    }
-
     public static double arredondar(double valor, int casas) {
         double fator = Math.pow(10, casas);
         return Math.floor(valor * fator) / fator;
