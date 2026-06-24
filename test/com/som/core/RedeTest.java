@@ -104,7 +104,10 @@ public class RedeTest {
     public void umNeuronioConvergeParaMediaDasAmostras() {
         // Com 1 neurônio e muitas épocas, os pesos convergem para a média:
         // miRNA-0=[1,0,1], miRNA-1=[0,1,1] → média=[0.5, 0.5, 1.0]
-        Rede rede = new Rede(ENTRADA, 1, 0.5, 0.9, 5000);
+        //
+        // 50000 épocas garante que lr decaia abaixo do DECAY_THRESHOLD (~22.5k épocas),
+        // estabilizando os pesos próximo à média com variância residual desprezível.
+        Rede rede = new Rede(ENTRADA, 1, 0.5, 0.9, 50000);
         rede.treinar();
         double[] pesos = rede.getNeuronios().get(0).getPesos();
         assertEquals("Gene 0 deve convergir para 0.5", 0.5, pesos[0], 0.15);
