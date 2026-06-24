@@ -65,12 +65,66 @@ public class Compare extends JFrame implements ActionListener {
 			mirnas[i] = nomes[i].trim();
 		}
 
-		for (String mirna : mirnas) {
-			criaVetor(mirna);
-		}
-
+		buscarTodos(mirnas);
 		matching();
 		analizar();
+	}
+
+	/**
+	 * Abre uma única conexão e executa uma query com IN (?, …) para todos
+	 * os miRNAs de uma vez, eliminando N round-trips ao banco de dados.
+	 */
+	private void buscarTodos(String[] mirnaNames) {
+		if (mirnaNames.length == 0) return;
+
+		StringBuilder placeholders = new StringBuilder("?");
+		for (int i = 1; i < mirnaNames.length; i++) {
+			placeholders.append(",?");
+		}
+
+		String url;
+		String sql;
+		if (jcbBanco.getSelectedIndex() == 0) {
+			url = DB_TARGETS_URL;
+			sql = "SELECT DISTINCT mirna, gene FROM micrornaorg "
+					+ "WHERE mirna IN (" + placeholders + ") ORDER BY mirna";
+		} else {
+			url = DB_TARGETSCAN_URL;
+			sql = "SELECT DISTINCT mirna.mirna, targets.Gene "
+					+ "FROM mirna INNER JOIN targets ON mirna.miRFamily = targets.miRFamily "
+					+ "WHERE mirna.mirna IN (" + placeholders + ") ORDER BY mirna.mirna";
+		}
+
+		// Inicializa uma lista por miRNA, já adicionada a target na ordem original
+		Map<String, List<String>> targetMap = new LinkedHashMap<>(mirnaNames.length * 2);
+		for (String name : mirnaNames) {
+			List<String> list = new ArrayList<>();
+			list.add(name);
+			targetMap.put(name, list);
+			target.add(list);
+		}
+
+		try (Connection con = DriverManager.getConnection(url, DB_USER, DB_PASSWORD);
+			 PreparedStatement stmt = con.prepareStatement(sql)) {
+
+			for (int i = 0; i < mirnaNames.length; i++) {
+				stmt.setString(i + 1, mirnaNames[i]);
+			}
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					List<String> list = targetMap.get(rs.getString(1));
+					if (list != null) {
+						list.add(rs.getString(2));
+					}
+				}
+			}
+
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(this,
+					"Consulta erro: " + e.getMessage(),
+					"Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	/**
@@ -117,46 +171,6 @@ public class Compare extends JFrame implements ActionListener {
 		sb.append("\n com matches >= ").append(minCount).append(": ").append(filtered.size());
 
 		jtSaida.setText(sb.toString());
-	}
-
-	// -------------------------------------------------------------------------
-	// Acesso ao banco de dados
-	// -------------------------------------------------------------------------
-
-	private void criaVetor(String mirna) {
-		try {
-			List<String> al = new ArrayList<>();
-			al.add(mirna);
-
-			String url;
-			String sql;
-			if (jcbBanco.getSelectedIndex() == 0) {
-				url = DB_TARGETS_URL;
-				sql = "SELECT DISTINCT gene FROM micrornaorg WHERE mirna = ?";
-			} else {
-				url = DB_TARGETSCAN_URL;
-				sql = "SELECT DISTINCT targets.Gene "
-						+ "FROM mirna INNER JOIN targets ON mirna.miRFamily = targets.miRFamily "
-						+ "WHERE mirna.mirna = ?";
-			}
-
-			try (Connection con = DriverManager.getConnection(url, DB_USER, DB_PASSWORD);
-				 PreparedStatement stmt = con.prepareStatement(sql)) {
-				stmt.setString(1, mirna);
-				try (ResultSet rs = stmt.executeQuery()) {
-					while (rs.next()) {
-						al.add(rs.getString(1));
-					}
-				}
-			}
-
-			target.add(al);
-
-		} catch (SQLException e) {
-			JOptionPane.showMessageDialog(this,
-					"Consulta erro: " + e.getMessage(),
-					"Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
-		}
 	}
 
 	// -------------------------------------------------------------------------

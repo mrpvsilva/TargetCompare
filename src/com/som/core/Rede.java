@@ -33,7 +33,7 @@ public class Rede implements Serializable {
 		for (int i = 1; i < constanteTempo + 1; i++) {
 			int index = sortearIndex();
 			competir(index);
-			decaimentoExponencial(i);
+			decaimentoExponencial();
 			cooperar();
 			adaptar(index);
 			atualizarTaxaAprendizado();
@@ -62,21 +62,19 @@ public class Rede implements Serializable {
 	}
 
 	private int findBmuIndex(int inputIndex) {
+		double[] input = vetorEntrada[inputIndex];
+		int bmuIndex = 0;
+		double minDistSq = Double.MAX_VALUE;
 		for (int i = 0; i < neuronios.size(); i++) {
-			double sum = 0;
 			double[] pesos = neuronios.get(i).getPesos();
+			double sum = 0;
 			for (int j = 0; j < pesos.length; j++) {
-				sum += Math.pow(pesos[j] - vetorEntrada[inputIndex][j], 2);
+				double d = pesos[j] - input[j];
+				sum += d * d;
 			}
 			neuronios.get(i).setDistanciaEuclidiana(Math.sqrt(sum));
-		}
-
-		int bmuIndex = 0;
-		double menorDistancia = neuronios.get(0).getDistanciaEuclidiana();
-		for (int i = 1; i < neuronios.size(); i++) {
-			double d = neuronios.get(i).getDistanciaEuclidiana();
-			if (d < menorDistancia) {
-				menorDistancia = d;
+			if (sum < minDistSq) {
+				minDistSq = sum;
 				bmuIndex = i;
 			}
 		}
@@ -110,17 +108,45 @@ public class Rede implements Serializable {
 		}
 	}
 
+	/**
+	 * Encontra o neurônio vencedor (BMU) para a amostra dada em um único
+	 * passo. Compara distâncias ao quadrado para evitar Math.sqrt na busca;
+	 * armazena a distância euclidiana real no neurônio para uso externo.
+	 */
 	private void competir(int index) {
-		calcularDistanciaEuclidiana(index);
-		encontrarNeuronioVencedor();
+		double[] input = vetorEntrada[index];
+		double minDistSq = Double.MAX_VALUE;
+		vencedor = neuronios.get(0);
+		for (Neuronio n : neuronios) {
+			double[] pesos = n.getPesos();
+			double sum = 0;
+			for (int j = 0; j < pesos.length; j++) {
+				double d = pesos[j] - input[j];
+				sum += d * d;
+			}
+			n.setDistanciaEuclidiana(Math.sqrt(sum));
+			if (sum < minDistSq) {
+				minDistSq = sum;
+				vencedor = n;
+			}
+		}
 	}
 
+	/**
+	 * Calcula a gaussiana de vizinhança. Pré-calcula 2σ² fora do loop e opera
+	 * com distâncias ao quadrado diretamente, sem Math.sqrt nem Math.pow.
+	 */
 	private void cooperar() {
+		double[] pesosVencedor = vencedor.getPesos();
+		double sigma2 = 2.0 * raioGaussiana * raioGaussiana;
 		for (Neuronio n : neuronios) {
-			double dist = distanciaNeuronioParaVencedor(n);
-			double gau = MetodosAcessorios.arredondar(
-					Math.exp(-(Math.pow(dist, 2) / (2 * Math.pow(raioGaussiana, 2)))), 8);
-			n.setGaussiana(gau);
+			double[] pesosN = n.getPesos();
+			double distSq = 0;
+			for (int j = 0; j < pesosN.length; j++) {
+				double d = pesosN[j] - pesosVencedor[j];
+				distSq += d * d;
+			}
+			n.setGaussiana(Math.exp(-distSq / sigma2));
 		}
 	}
 
@@ -134,9 +160,14 @@ public class Rede implements Serializable {
 		}
 	}
 
-	private void decaimentoExponencial(int epoca) {
+	/**
+	 * Decaimento por passo: σ(t+1) = σ(t) × exp(−1/T).
+	 * Equivale a σ0 × exp(−t/T) sem precisar armazenar σ0,
+	 * e garante decaimento uniforme ao longo de todas as épocas.
+	 */
+	private void decaimentoExponencial() {
 		if (raioGaussiana > DECAY_THRESHOLD) {
-			raioGaussiana *= Math.exp(-((double) epoca / constanteTempo));
+			raioGaussiana *= Math.exp(-1.0 / constanteTempo);
 		}
 	}
 
@@ -150,40 +181,7 @@ public class Rede implements Serializable {
 		return (int) (Math.random() * vetorEntrada.length);
 	}
 
-	private void calcularDistanciaEuclidiana(int index) {
-		for (Neuronio n : neuronios) {
-			double sum = 0;
-			double[] pesos = n.getPesos();
-			for (int j = 0; j < pesos.length; j++) {
-				sum += Math.pow(pesos[j] - vetorEntrada[index][j], 2);
-			}
-			n.setDistanciaEuclidiana(Math.sqrt(sum));
-		}
-	}
-
-	private void encontrarNeuronioVencedor() {
-		vencedor = neuronios.get(0);
-		double menor = vencedor.getDistanciaEuclidiana();
-		for (int i = 1; i < neuronios.size(); i++) {
-			Neuronio n = neuronios.get(i);
-			if (n.getDistanciaEuclidiana() < menor) {
-				menor = n.getDistanciaEuclidiana();
-				vencedor = n;
-			}
-		}
-	}
-
-	private double distanciaNeuronioParaVencedor(Neuronio n) {
-		double[] pesosVencedor = vencedor.getPesos();
-		double[] pesosN = n.getPesos();
-		double sum = 0;
-		for (int j = 0; j < pesosN.length; j++) {
-			sum += Math.pow(pesosN[j] - pesosVencedor[j], 2);
-		}
-		return Math.sqrt(sum);
-	}
-
-	// --- kept for backward compatibility with view.java ---
+	// --- mantido para compatibilidade com view.java ---
 	public void Treinar() { treinar(); }
 	public String Classificar(String[] mirnas) { return classificar(mirnas); }
 

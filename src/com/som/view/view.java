@@ -20,6 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import targetcompare.Compare;
 import targetcompare.Gene;
@@ -169,10 +170,30 @@ public class view extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Rede iniciada");
 
 		} else if (e.getSource() == treinar) {
-			r.Treinar();
-			JOptionPane.showMessageDialog(null, "Rede treinada com sucesso!");
-			jb_plot.setEnabled(true);
-			context.setResultado(r.Classificar(mirnas));
+			treinar.setEnabled(false);
+			reiniciar.setEnabled(false);
+			jb_plot.setEnabled(false);
+			new SwingWorker<String, Void>() {
+				@Override
+				protected String doInBackground() {
+					r.Treinar();
+					return r.Classificar(mirnas);
+				}
+				@Override
+				protected void done() {
+					reiniciar.setEnabled(true);
+					treinar.setEnabled(true);
+					try {
+						context.setResultado(get());
+						jb_plot.setEnabled(true);
+						JOptionPane.showMessageDialog(view.this, "Rede treinada com sucesso!");
+					} catch (Exception ex) {
+						JOptionPane.showMessageDialog(view.this,
+								"Erro no treinamento: " + ex.getMessage(),
+								"Erro", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+			}.execute();
 
 		} else if (e.getSource() == jb_plot) {
 			MetodosAcessorios.Plot(r, entrada);

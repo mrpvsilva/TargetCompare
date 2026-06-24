@@ -1,29 +1,35 @@
 package targetcompare;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Gene {
 
     private final String nomeGene;
     private final List<Mirna> mirnas;
+    private final Map<String, Mirna> mirnaMap;
     private int qtdade;
 
     public Gene(String nomeGene, String[] nomesMirnas) {
         this.nomeGene = nomeGene;
         this.mirnas = new ArrayList<>(nomesMirnas.length);
+        this.mirnaMap = new LinkedHashMap<>(nomesMirnas.length * 2);
         for (String nome : nomesMirnas) {
-            mirnas.add(new Mirna(nome));
+            Mirna m = new Mirna(nome);
+            mirnas.add(m);
+            mirnaMap.put(nome, m);
         }
     }
 
+    /** Marca o miRNA como alvo deste gene. Chamadas duplicadas são ignoradas. */
     public void markMirnaAsTarget(String nome) {
-        for (Mirna mirna : mirnas) {
-            if (mirna.getNome().equals(nome)) {
-                mirna.setAlvo(true);
-            }
+        Mirna mirna = mirnaMap.get(nome);
+        if (mirna != null && !mirna.isAlvo()) {
+            mirna.setAlvo(true);
+            qtdade++;
         }
-        qtdade = (int) mirnas.stream().filter(Mirna::isAlvo).count();
     }
 
     public String toTableRow() {
@@ -35,15 +41,7 @@ public class Gene {
         return sb.toString();
     }
 
-    public String getNomeGene() {
-        return nomeGene;
-    }
-
-    public int getQtdade() {
-        return qtdade;
-    }
-
-    public List<Mirna> getMirnas() {
-        return mirnas;
-    }
+    public String getNomeGene() { return nomeGene; }
+    public int getQtdade() { return qtdade; }
+    public List<Mirna> getMirnas() { return mirnas; }
 }
