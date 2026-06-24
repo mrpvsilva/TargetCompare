@@ -2,15 +2,15 @@
 bin/
 out/
 *.class
-*.jar
 *.war
 *.ear
 *.nar
 
-# Eclipse
-.classpath
-.project
-.settings/
+# Serialized SOM networks (runtime artifacts)
+*.ob
+*.ser
+
+# Eclipse (gerados automaticamente ao importar — manter apenas os essenciais)
 .metadata/
 .recommenders/
 
@@ -45,9 +45,8 @@ build/
 gradle-app.setting
 !gradle-wrapper.jar
 
-# Serialized objects
-*.ob
-*.ser
+# Claude Code
+.claude/
 
 # Dados de carga (arquivos grandes, não versionados)
 carga/*
